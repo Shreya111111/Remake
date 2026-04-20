@@ -1,0 +1,65 @@
+{
+  "entities": {
+    "User": {
+      "title": "User",
+      "description": "User profile and upcycling statistics",
+      "type": "object",
+      "properties": {
+        "uid": { "type": "string" },
+        "displayName": { "type": "string" },
+        "email": { "type": "string" },
+        "itemsScanned": { "type": "integer" },
+        "projectsCompleted": { "type": "integer" },
+        "wasteDivertedKg": { "type": "number" },
+        "updatedAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["uid", "itemsScanned", "projectsCompleted", "wasteDivertedKg"]
+    },
+    "MarketplaceItem": {
+      "title": "Marketplace Item",
+      "description": "An item listed in the community marketplace",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "title": { "type": "string" },
+        "description": { "type": "string" },
+        "price": { "type": "number" },
+        "isGift": { "type": "boolean" },
+        "imageUrl": { "type": "string" },
+        "sellerId": { "type": "string" },
+        "sellerName": { "type": "string" },
+        "category": { "type": "string" },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["id", "title", "description", "sellerId", "category", "createdAt"]
+    },
+    "Scan": {
+      "title": "Scan Result",
+      "description": "History of an item analyzed by AI",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "name": { "type": "string" },
+        "material": { "type": "string" },
+        "condition": { "type": "string" },
+        "imageUrl": { "type": "string" },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["id", "name", "material", "condition", "createdAt"]
+    }
+  },
+  "firestore": {
+    "/users/{userId}": {
+      "schema": "User",
+      "description": "User account data and statistics"
+    },
+    "/marketplace/{itemId}": {
+      "schema": "MarketplaceItem",
+      "description": "Shared community marketplace listings"
+    },
+    "/users/{userId}/scans/{scanId}": {
+      "schema": "Scan",
+      "description": "Private history of scanned items for a user"
+    }
+  }
+}

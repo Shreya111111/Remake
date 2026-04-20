@@ -1,0 +1,89 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // 0. Global Safety Net
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    // --- Helpers ---
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function isOwner(userId) {
+      return isSignedIn() && request.auth.uid == userId;
+    }
+
+    function isValidId(id) {
+      return id is string && id.size() <= 128 && id.matches('^[a-zA-Z0-9_\\-]+$');
+    }
+
+    function incoming() {
+      return request.resource.data;
+    }
+
+    function existing() {
+      return resource.data;
+    }
+
+    // --- User Profiles ---
+    match /users/{userId} {
+      allow get: if isOwner(userId);
+      // List of users is forbidden to protect PII
+      allow list: if false;
+
+      function isValidUser(data) {
+        return data.uid == request.auth.uid 
+          && data.itemsScanned is int && data.itemsScanned >= 0
+          && data.projectsCompleted is int && data.projectsCompleted >= 0
+          && data.wasteDivertedKg is number && data.wasteDivertedKg >= 0
+          && data.keys().hasAll(['uid', 'itemsScanned', 'projectsCompleted', 'wasteDivertedKg']);
+      }
+
+      allow create: if isOwner(userId) && isValidUser(incoming()) && incoming().keys().size() >= 4;
+      allow update: if isOwner(userId) && isValidUser(incoming()) 
+        && incoming().diff(existing()).affectedKeys().hasOnly(['itemsScanned', 'projectsCompleted', 'wasteDivertedKg', 'displayName', 'updatedAt']);
+
+      // --- Scans History ---
+      match /scans/{scanId} {
+        allow read: if isOwner(userId);
+        
+        function isValidScan(data) {
+          return data.name is string && data.name.size() <= 100
+            && data.material is string && data.material.size() <= 100
+            && data.condition is string && data.condition.size() <= 100
+            && data.createdAt == request.time;
+        }
+
+        allow create: if isOwner(userId) && isValidScan(incoming());
+        allow delete: if isOwner(userId);
+      }
+    }
+
+    // --- Marketplace ---
+    match /marketplace/{itemId} {
+      // Marketplace is public for exploration
+      allow list, get: if true;
+
+      function isValidMarketItem(data) {
+        return data.sellerId == request.auth.uid
+          && data.title is string && data.title.size() <= 200
+          && data.description is string && data.description.size() <= 1000
+          && data.category is string
+          && (data.price is number || data.isGift == true)
+          && data.createdAt == request.time;
+      }
+
+      allow create: if isSignedIn() && isValidId(itemId) && isValidMarketItem(incoming());
+      
+      allow update: if isSignedIn() 
+        && existing().sellerId == request.auth.uid
+        && isValidMarketItem(incoming())
+        && incoming().diff(existing()).affectedKeys().hasOnly(['title', 'description', 'price', 'isGift', 'category', 'imageUrl']);
+      
+      allow delete: if isSignedIn() && existing().sellerId == request.auth.uid;
+    }
+  }
+}

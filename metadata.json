@@ -1,0 +1,8 @@
+{
+  "name": "ReMake", 
+  "description": "AI-powered upcycling advisor that analyzes household items and suggests creative DIY projects to divert waste from landfills.",
+  "requestFramePermissions": [
+    "camera"
+  ],
+  "majorCapabilities": []
+}

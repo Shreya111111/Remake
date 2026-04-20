@@ -1,0 +1,52 @@
+@import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;700&family=Inter:wght@400;600;800&display=swap');
+@import "tailwindcss";
+
+@theme {
+  --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
+  --font-mono: "IBM+Plex+Mono", "Courier New", monospace;
+
+  --color-bg: #F9F7F2;
+  --color-ink: #1A1C19;
+  --color-accent: #4A6741;
+  --color-sage: #A7BC9F;
+  --color-line: #D1CEC7;
+  --color-surface: #FFFFFF;
+}
+
+@layer base {
+  body {
+    @apply bg-bg text-ink font-sans;
+  }
+}
+
+@layer utilities {
+  .border-bold {
+    @apply border-2 border-ink;
+  }
+
+  .border-thin {
+    @apply border border-line hover:border-ink transition-colors;
+  }
+
+  .label-caps {
+    @apply text-[11px] font-bold text-accent uppercase tracking-wider mb-1 block;
+  }
+
+  .value-mono {
+    @apply font-mono text-base font-bold;
+  }
+
+  .pane {
+    @apply bg-surface border-2 border-ink;
+  }
+
+  .header-nav {
+    @apply flex justify-between items-end border-b-2 border-ink pb-3;
+  }
+
+  .card-geometric {
+    @apply border border-line p-5 bg-surface hover:border-ink transition-all;
+  }
+}
+
+
